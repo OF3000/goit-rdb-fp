@@ -1,0 +1,91 @@
+{\rtf1\ansi\ansicpg1252\cocoartf2821
+\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
+{\colortbl;\red255\green255\blue255;\red0\green0\blue0;}
+{\*\expandedcolortbl;;\cssrgb\c0\c0\c0;}
+\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
+\deftab720
+\pard\pardeftab720\sl313\partightenfactor0
+
+\f0\fs29\fsmilli14667 \cf2 \expnd0\expndtw0\kerning0
+1 \
+create table entities (\
+\pard\pardeftab720\fi944\sl313\partightenfactor0
+\cf2 id int auto_increment primary key,\
+\pard\pardeftab720\sl313\partightenfactor0
+\cf2 \'a0\'a0\'a0 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 Entity varchar(255) not null,\
+\'a0\'a0\'a0 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 Code varchar(10) not null);\
+\'a0\'a0\'a0 \
+insert into entities (entity, code)\
+SELECT DISTINCT Entity, Code\
+FROM infectious_cases;\
+\'a0\
+2 \
+CREATE TABLE infectious_cases_normalized (\
+\'a0\'a0\'a0 id INT AUTO_INCREMENT PRIMARY KEY,\
+\'a0\'a0\'a0 entity_id INT,\
+\'a0\'a0\'a0 year INT,\
+\'a0\'a0\'a0 number_yaws VARCHAR(255),\
+\'a0\'a0\'a0 polio_cases INT,\
+\'a0\'a0\'a0 cases_guinea_worm INT,\
+\'a0\'a0\'a0 number_rabies VARCHAR(255),\
+\'a0\'a0\'a0 number_malaria BIGINT,\
+\'a0\'a0\'a0 number_hiv VARCHAR(255),\
+\'a0\'a0\'a0 number_tuberculosis VARCHAR(255),\
+\'a0\'a0\'a0 number_smallpox VARCHAR(255),\
+\'a0\'a0\'a0 number_cholera_cases VARCHAR(255),\
+\'a0\'a0\'a0 FOREIGN KEY (entity_id) REFERENCES entities(id)\
+);\
+insert into infectious_cases_normalized(\
+\'a0\'a0\'a0 entity_id, \
+\'a0\'a0\'a0 year, \
+\'a0\'a0\'a0 polio_cases, \
+\'a0\'a0\'a0 cases_guinea_worm, \
+\'a0\'a0\'a0 number_rabies, \
+\'a0\'a0\'a0 number_malaria, \
+\'a0\'a0\'a0 number_hiv, \
+\'a0\'a0\'a0 number_tuberculosis, \
+\'a0\'a0\'a0 number_smallpox, \
+\'a0\'a0\'a0 number_cholera_cases\
+)\
+SELECT entities.id, ic.Year, ic.polio_cases, ic.cases_guinea_worm, ic.Number_rabies, \
+\'a0\'a0\'a0\'a0\'a0\'a0 ic.Number_malaria, ic.Number_hiv, ic.Number_tuberculosis, ic.Number_smallpox, ic.Number_cholera_cases\
+FROM infectious_cases ic\
+JOIN entities ON ic.Entity = entities.Entity AND ic.Code = entities.Code;\
+\'a0\
+3\
+select entity_id,\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 min(Number_rabies) AS min_rabies, \
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 max(Number_rabies) AS max_rabies, \
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 avg(Number_rabies) AS avg_rabies, \
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 sum(Number_rabies) AS sum_rabies\
+from infectious_cases_normalized inc\
+join entities on entity_id=entities.id\'a0\'a0\'a0\'a0\'a0\'a0 \
+where Number_rabies != ''\
+group by entity_id\
+order by avg_rabies desc\
+limit 10\
+\'a0\
+4\
+select year,\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 makedate(year, 1) as first_day,\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 curdate() as cur_date,\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 timestampdiff(year,makedate(year, 1), curdate()) as year_diff\
+from infectious_cases_normalized;\
+\'a0\
+5\
+DELIMITER //\
+create function CalculateYearDifference(year int)\
+returns int\
+DETERMINISTIC \
+begin \
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 declare years_diff int;\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 set years_diff = timestampdiff(year,makedate(year, 1), curdate());\
+\'a0\
+return years_diff;\
+end//\
+DELIMITER ;\
+\'a0\
+select\'a0 year,\
+\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 CalculateYearDifference(year) as years_diff\
+from infectious_cases_normalized\
+}
