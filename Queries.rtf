@@ -52,6 +52,11 @@ SELECT entities.id, ic.Year, ic.polio_cases, ic.cases_guinea_worm, ic.Number_rab
 FROM infectious_cases ic\
 JOIN entities ON ic.Entity = entities.Entity AND ic.Code = entities.Code;\
 \'a0\
+2/2 
+\fs29\fsmilli14600 \cf0 \kerning1\expnd0\expndtw0 select count(*) from infectious_cases;
+\fs29\fsmilli14667 \cf2 \expnd0\expndtw0\kerning0
+\
+\
 3\
 select entity_id,\
 \'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0\'a0 min(Number_rabies) AS min_rabies, \
